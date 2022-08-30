@@ -1,0 +1,69 @@
+Public Function Levenshtein(str1 As String, str2 As String)
+    '#note18-1:计算莱文斯坦距离（编辑距离）
+    Dim i, j, l1, l2 As Integer
+    Dim d() As Integer
+    Dim min1, min2 As Integer
+    l1 = Len(str1)
+    l2 = Len(str2)
+
+    ReDim d(l1, l2)
+
+    For i = 0 To l1
+        d(i, 0) = i
+    Next
+
+    For j = 0 To l2
+        d(0, j) = j
+    Next
+
+    For i = 1 To l1
+        For j = 1 To l2
+            If Mid(str1, i, 1) = Mid(str2, j, 1) Then
+                d(i, j) = d(i - 1, j - 1)
+            Else:
+                min1 = d(i - 1, j) + 1
+                min2 = d(i, j - 1) + 1
+                If min2 < min1 Then
+                    min1 = min2
+                End If
+                min2 = d(i - 1, j - 1) + 1
+                If min2 < min1 Then
+                    min1 = min2
+                End If
+                d(i, j) = min1
+            End If
+        Next
+    Next
+    Levenshtein = d(l1, l2)
+End Function
+
+Public Function Similarity(str1 As String, str2 As String)
+    '#note18-2:计算两个字符串的相似性
+    Dim ldint As Integer
+    ldint = Levenshtein(str1, str2)
+    Dim strlen As Integer
+    If (Len(str1) >= Len(str2)) Then
+        strlen = Len(str1)
+    Else
+        strlen = Len(str2)
+    End If
+        Similarity = 1 - ldint / strlen
+End Function
+
+Public Function SimilartyRng(str1 As String, simirng As Range, value_index As Integer)
+    '#note18-3:查找相似度最高的字符串
+    Dim rng As Range
+    Dim max_simi As Single
+    Dim simi_name As String
+
+    max_simi = 0
+        For Each rng In simirng
+            simi = Similarity(str1, rng.Text)
+            If simi > max_simi Then
+                max_simi = simi
+                simi_name = rng.Offset(0, value_index).Text
+                'simi_name = rng.Text
+            End If
+        Next rng
+        SimilartyRng = simi_name
+End Function
